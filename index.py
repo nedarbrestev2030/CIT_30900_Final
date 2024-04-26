@@ -25,7 +25,7 @@ def create_csv_report(cliEmpCSV:str):
             employee_exposure_checks.append(employee_exposure_check)
     csvfile.close()
     
-    with open("employee_risk.csv", "w") as csvfile:
+    with open("employee_risk.csv", "w", newline='') as csvfile:
         fieldnames = ["first_name", "last_name", "email", "ssn", "risk_level"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         
