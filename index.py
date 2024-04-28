@@ -62,10 +62,29 @@ def create_csv_report(cliEmpCSV:str):
             writer.writerow(emp)
     csvfile.close()
     
+def analyse_exposure_report(report):
+    with open(report, 'r') as csvfile:
+        reader = csv.DictReader(csvfile)
+        check_results = []
+        for row in reader:
+            check_result = {
+                "employee":f'{row["first_name"]} {row["last_name"]}',
+                "email":row["email"],
+                "exposure_level":row["risk_level"]
+            }
+            check_results.append(check_result)
+    csvfile.close()
+    
+    for result in check_results:
+        print(result["employee"])
+        
+            
+    
 
 def main():
-    scrape_employee_data("https://cit30900.github.io/strawbridge/")
-    create_csv_report("employee_data.csv")
+    # scrape_employee_data("https://cit30900.github.io/strawbridge/")
+    # create_csv_report("employee_data.csv")
+    analyse_exposure_report("employee_risk.csv")
     
 if __name__ == "__main__":
     main()
