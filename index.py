@@ -68,19 +68,45 @@ def analyse_exposure_report(report):
         check_results = []
         for row in reader:
             check_result = {
-                "employee":f'{row["first_name"]} {row["last_name"]}',
+                "employee":f'{row["first_name"]}_{row["last_name"]}',
                 "email":row["email"],
                 "exposure_level":row["risk_level"]
             }
             check_results.append(check_result)
     csvfile.close()
     
-    for result in check_results:
-        print(result["employee"])
-        
-            
+    exposure_counts = {
+        "low":0,
+        "medium":0,
+        "high":0
+    }
     
-
+    for result in check_results:
+        if result["exposure_level"] == "low":
+            exposure_counts["low"]+=1
+        elif result["exposure_level"] == "medium":
+            exposure_counts["medium"]+=1
+        elif result["exposure_level"] == "high":
+            exposure_counts["high"]+=1
+            
+            
+            
+#             with open(f"{result['employee']}.txt", 'w') as file:
+#                 exposure_notice_email = f"""
+# Dear {result["employee"]}
+               
+# Your personal data was accidentally exposed on the Strawbridge Industries website and is at risk of being compromised. The company regrets this error and would like to offer a credit monitoring service at no cost to you. Please contact HR to establish this service.
+                
+# Thank you,
+# Dick Strawbridge, CEO"""
+                
+#                 file.writelines(exposure_notice_email)
+#             file.close()
+            
+#     print(f"Low risk exposures detected : {exposure_counts['low']}")
+#     print(f"Medium risk exposures detected : {exposure_counts['medium']}")
+#     print(f"High risk exposures detected : {exposure_counts['high']}")
+    
 def main():
     # scrape_employee_data("https://cit30900.github.io/strawbridge/")
     # create_csv_report("employee_data.csv")
