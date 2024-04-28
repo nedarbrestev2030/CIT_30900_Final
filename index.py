@@ -3,10 +3,14 @@ from bs4 import BeautifulSoup
 import requests
 
 def scrape_employee_data(URL:str):
+    print(f"ACTION: Retrieving content from {URL}")
     page = requests.get(URL)
     soup = BeautifulSoup(page.text, 'lxml')
+    
+    print(f"ACTION: Extracting data from HTML")
     exposed_contact_cards = [data for data in soup.find_all('div', class_ = "card employee")]
     
+    print(f"ACTION: Writing data to employee_data.csv")
     with open("employee_data.csv", "w", newline='') as csvfile:
         fieldnames = ['emp_first_name', 'emp_last_name', 'emp_email', 'emp_ssn', "emp_phone"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -38,6 +42,8 @@ def check_ssn_risk_level(ssn:str)->str:
 def create_csv_report(cliEmpCSV:str):
     employee_exposure_checks=[]
     
+    print(f"ACTION: Copying data from {cliEmpCSV}")
+    print(f"ACTION: Checking employee SSN exposure level")
     with open(cliEmpCSV, "rt") as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
@@ -53,6 +59,7 @@ def create_csv_report(cliEmpCSV:str):
             employee_exposure_checks.append(employee_exposure_check)
     csvfile.close()
     
+    print(f"ACTION: Composing client risk report, employee_risk.csv")
     with open("employee_risk.csv", "w", newline='') as csvfile:
         fieldnames = ["first_name", "last_name", "email", "ssn", "risk_level"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -63,6 +70,8 @@ def create_csv_report(cliEmpCSV:str):
     csvfile.close()
     
 def analyse_exposure_report(report):
+    
+    print(f"ACTION: Copying data from {report}")
     with open(report, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         check_results = []
@@ -81,6 +90,7 @@ def analyse_exposure_report(report):
         "high":0
     }
     
+    print(f"ACTION: Summarizing exposure results")
     for result in check_results:
         if result["exposure_level"] == "low":
             exposure_counts["low"]+=1
@@ -89,27 +99,32 @@ def analyse_exposure_report(report):
         elif result["exposure_level"] == "high":
             exposure_counts["high"]+=1
             
+            emp_name_split = (result["employee"].split("_"))
             
-            
-#             with open(f"{result['employee']}.txt", 'w') as file:
-#                 exposure_notice_email = f"""
-# Dear {result["employee"]}
+            print(f"ACTION: Composing high risk email for {result['employee']}")
+            with open(f"{result['employee']}.txt", 'w') as file:
+                exposure_notice_email = f"""
+Dear {emp_name_split[0]+ ' ' + emp_name_split[1]},
                
-# Your personal data was accidentally exposed on the Strawbridge Industries website and is at risk of being compromised. The company regrets this error and would like to offer a credit monitoring service at no cost to you. Please contact HR to establish this service.
+Your personal data was accidentally exposed on the Strawbridge Industries website and is at risk of being compromised. The company regrets this error and would like to offer a credit monitoring service at no cost to you. Please contact HR to establish this service.
                 
-# Thank you,
-# Dick Strawbridge, CEO"""
+Thank you,
+Dick Strawbridge, CEO"""
                 
-#                 file.writelines(exposure_notice_email)
-#             file.close()
+                file.writelines(exposure_notice_email)
+        else:
+            print("MESSAGE: Result missing exposure level")
             
-#     print(f"Low risk exposures detected : {exposure_counts['low']}")
-#     print(f"Medium risk exposures detected : {exposure_counts['medium']}")
-#     print(f"High risk exposures detected : {exposure_counts['high']}")
+            file.close()
+
+    print ("________________________________________")            
+    print(f"Low risk exposures detected : {exposure_counts['low']}")
+    print(f"Medium risk exposures detected : {exposure_counts['medium']}")
+    print(f"High risk exposures detected : {exposure_counts['high']}")
     
 def main():
-    # scrape_employee_data("https://cit30900.github.io/strawbridge/")
-    # create_csv_report("employee_data.csv")
+    scrape_employee_data("https://cit30900.github.io/strawbridge/")
+    create_csv_report("employee_data.csv")
     analyse_exposure_report("employee_risk.csv")
     
 if __name__ == "__main__":
